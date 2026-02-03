@@ -84,7 +84,16 @@ bool parseModContents(ModSpec &spec)
 		info.readConfigFile((spec.path + DIR_DELIM + conf_filename).c_str());
 
 	if (info.exists("name")) {
-		spec.name = info.get("name");
+        std::string raw_name = info.get("name");
+
+    	if (!string_allowed(raw_name, MODNAME_ALLOWED_CHARS)) {
+            
+            errorstream << "Error loading mod \"" << raw_name << "\": Mod name contains invalid characters. "
+                        << "Only characters [a-z0-9_] are allowed." << std::endl;
+            return false;
+        }
+		
+		spec.name = raw_name;
 		spec.is_name_explicit = true;
 	} else if (!spec.is_modpack) {
 		spec.deprecation_msgs.push_back("Mods not having a mod.conf file with the name is deprecated.");
